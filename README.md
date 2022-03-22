@@ -38,7 +38,7 @@
       - 메소드 이름으로 쿼리 생성 ex -> findByUsernameIn
       - @Query 쿼리 생성 ex -> m.username in :names / @Param("names") List<String> names
 - **반환 타입**
-  - [List(T), T, Optional(T)] 자유로움
+  - [List(T), T, Optional(T), Page(T) ...] 자유로움(https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#repository-query-return-types)
     - 대신 무조건 복수건과 단건 유의(IncorrectResultSizeDataAccessException)
   - NLP CHECK
     - List(T) ex -> if(members.size() == 0) 
