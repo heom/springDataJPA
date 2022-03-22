@@ -58,10 +58,7 @@ public class MemberJpaRepository {
     }
 
     /**
-     * @Description 순수 JPA 경우, 1. 메소드 이름으로 쿼리 생성 예시
-     * @Param username
-     * @Param age
-     * @Retrun List<Member>
+     * @Description 순수 JPA 경우, [쿼리 메소드 1번] 메소드 이름으로 쿼리 생성 예시
      **/
     public List<Member> findByUsernameAndAgeGreaterThan(String username, int age){
         //JPQL
@@ -72,9 +69,7 @@ public class MemberJpaRepository {
     }
 
     /**
-     * @Description 순수 JPA 경우, 2. 메소드 이름으로 JPA NamedQuery 호출 <= 실무에선 잘 사용안함
-     * @Param username
-     * @Retrun List<Member>
+     * @Description 순수 JPA 경우, [쿼리 메소드 2번] 메소드 이름으로 JPA NamedQuery 호출
      **/
     public List<Member> findByUsername(String username){
         return em.createNamedQuery("Member.findByUsername", Member.class)
