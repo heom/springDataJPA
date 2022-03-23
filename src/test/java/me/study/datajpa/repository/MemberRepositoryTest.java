@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -28,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @Description Spring Data JPA TEST
  **/
 @SpringBootTest
+@Rollback(false)
 class MemberRepositoryTest {
 
     @Autowired
@@ -290,5 +292,38 @@ class MemberRepositoryTest {
         assertThat(member5.getAge()).isEqualTo(41);
 
         assertThat(resultCount).isEqualTo(3);
+    }
+
+    /**
+     * @Description [@EntityGraph]
+     **/
+    @Test
+    @Transactional
+    public void entityGraphAnnotation(){
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member1", 10, teamB);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        em.flush();
+        em.clear();
+
+        // FetchType.LAZY 경우 N+1 문제가 발생, 즉 추가 Query 발생
+//        List<Member> members = memberRepository.findAll();
+        // 1. @Query 사용 시 fetch 추가
+//        List<Member> members = memberRepository.findMemberFetchJoin();
+        // 2. @EntityGraph(attributePaths = {})
+//        List<Member> members = memberRepository.findAll();
+        // 3. 3. @NamedEntityGraph Entity 추가
+        List<Member> members = memberRepository.findEntityGraphByUsername("member1");
+        for(Member member:members){
+            System.out.println("member => "+member);
+            System.out.println("member.team.name => "+member.getTeam().getName());
+        }
     }
 }
