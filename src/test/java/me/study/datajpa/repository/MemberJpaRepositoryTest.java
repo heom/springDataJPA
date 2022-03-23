@@ -10,25 +10,22 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * @FileName MemberJpaRepositoryTest.java
+ * @Author ccs
+ * @Version 1.0.0
+ * @Date 2022-03-23
+ * @Description 순수 JPA TEST
+ **/
 @SpringBootTest
 class MemberJpaRepositoryTest {
 
     @Autowired
     MemberJpaRepository memberJpaRepository;
 
-    @Test
-    @Transactional
-    public void testMember(){
-        Member member = new Member("memberA");
-        Member saveMember = memberJpaRepository.save(member);
-
-        Member findMember = memberJpaRepository.find(saveMember.getId());
-
-        assertThat(findMember.getId()).isEqualTo(member.getId());
-        assertThat(findMember.getUsername()).isEqualTo(member.getUsername());
-        assertThat(findMember).isEqualTo(member);
-    }
-
+    /**
+     * @Description [순수 JPA 경우, Spring-Data-JPA 기본 메소드 예시]
+     **/
     @Test
     @Transactional
     public void basicCRUD(){
@@ -60,9 +57,12 @@ class MemberJpaRepositoryTest {
         assertThat(deletedCount).isEqualTo(0);
     }
 
+    /**
+     * @Description [순수 JPA 경우, Query Method] - 1번, 메소드 이름으로 쿼리 생성 예시
+     **/
     @Test
     @Transactional
-    public void findByUsernameAndAgeGreaterThen(){
+    public void methodNameQuery(){
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("AAA", 20);
         memberJpaRepository.save(m1);
@@ -75,9 +75,12 @@ class MemberJpaRepositoryTest {
         assertThat(members.size()).isEqualTo(1);
     }
 
+    /**
+     * @Description [순수 JPA 경우, Query Method] - 2번, @NamedQuery
+     **/
     @Test
     @Transactional
-    public void testNamedQuery(){
+    public void namedQueryAnnotation(){
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("AAA", 20);
         memberJpaRepository.save(m1);
@@ -85,5 +88,28 @@ class MemberJpaRepositoryTest {
 
         List<Member> members = memberJpaRepository.findByUsername("AAA");
         assertThat(members.size()).isEqualTo(2);
+    }
+
+    /**
+     * @Description [순수 JPA 경우, Paging]
+     **/
+    @Test
+    @Transactional
+    public void paging(){
+        memberJpaRepository.save(new Member("member1", 10));
+        memberJpaRepository.save(new Member("member2", 10));
+        memberJpaRepository.save(new Member("member3", 10));
+        memberJpaRepository.save(new Member("member4", 10));
+        memberJpaRepository.save(new Member("member5", 10));
+
+        int age = 10;
+        int offset = 0;
+        int limit = 3;
+
+        List<Member> members = memberJpaRepository.findByPage(age, offset, limit);
+        Long totalCount = memberJpaRepository.totalCount(age);
+
+        assertThat(members.size()).isEqualTo(3);
+        assertThat(totalCount).isEqualTo(5);
     }
 }

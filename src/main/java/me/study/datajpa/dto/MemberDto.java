@@ -1,6 +1,7 @@
 package me.study.datajpa.dto;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @FileName MemberDto.java
@@ -10,6 +11,7 @@ import lombok.Data;
  * @Description Member Dto
  **/
 @Data
+@NoArgsConstructor
 public class MemberDto {
 
     private Long id;

@@ -6,6 +6,10 @@ import me.study.datajpa.entity.Team;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -14,6 +18,13 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * @FileName MemberRepositoryTest.java
+ * @Author ccs
+ * @Version 1.0.0
+ * @Date 2022-03-23
+ * @Description Spring Data JPA TEST
+ **/
 @SpringBootTest
 class MemberRepositoryTest {
 
@@ -23,18 +34,9 @@ class MemberRepositoryTest {
     @Autowired
     TeamRepository teamRepository;
 
-    @Test
-    @Transactional
-    public void testMember(){
-        Member member= new Member("memberA");
-        Member saveMember = memberRepository.save(member);
-        Member findMember = memberRepository.findById(saveMember.getId()).get();
-
-        assertThat(findMember.getId()).isEqualTo(member.getId());
-        assertThat(findMember.getUsername()).isEqualTo(member.getUsername());
-        assertThat(findMember).isEqualTo(member);
-    }
-
+    /**
+     * @Description [Spring-Data-JPA 기본 메소드]
+     **/
     @Test
     @Transactional
     public void basicCRUD(){
@@ -66,9 +68,12 @@ class MemberRepositoryTest {
         assertThat(deletedCount).isEqualTo(0);
     }
 
+    /**
+     * @Description [Query Method] - 1번, 메소드 이름으로 쿼리 생성
+     **/
     @Test
     @Transactional
-    public void findByUsernameAndAgeGreaterThen(){
+    public void methodNameQuery(){
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("AAA", 20);
 
@@ -82,9 +87,12 @@ class MemberRepositoryTest {
         assertThat(members.size()).isEqualTo(1);
     }
 
+    /**
+     * @Description [Query Method] - 2번, @NamedQuery
+     **/
     @Test
     @Transactional
-    public void testNamedQuery(){
+    public void namedQueryAnnotation(){
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("BBB", 20);
         memberRepository.save(m1);
@@ -94,9 +102,12 @@ class MemberRepositoryTest {
         assertThat(members.get(0)).isEqualTo(m1);
     }
 
+    /**
+     * @Description [Query Method] -3번, @Query
+     **/
     @Test
     @Transactional
-    public void testQuery(){
+    public void queryAnnotation(){
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("AAA", 20);
         memberRepository.save(m1);
@@ -106,9 +117,12 @@ class MemberRepositoryTest {
         assertThat(members.get(0)).isEqualTo(m2);
     }
 
+    /**
+     * @Description [반환 객체가 다를 경우] - List<String> 받는 경우
+     **/
     @Test
     @Transactional
-    public void findUsernameList(){
+    public void resultStringList(){
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("BBB", 20);
         memberRepository.save(m1);
@@ -119,9 +133,12 @@ class MemberRepositoryTest {
         assertThat(findUsernameList.get(1)).isEqualTo(m2.getUsername());
     }
 
+    /**
+     * @Description [반환 객체가 다를 경우] - List<MemberDto> 받는 경우, 다만 QueryDsl 쓰면 더 쉬워지니 우선 참고할 용도로만 씀
+     **/
     @Test
     @Transactional
-    public void findMemberDto(){
+    public void resultAnotherDTO(){
         Team teamA = new Team("teamA");
         teamRepository.save(teamA);
         Member m1 = new Member("AAA", 10);
@@ -132,22 +149,12 @@ class MemberRepositoryTest {
         assertThat(findUsernameList.get(0).getId()).isEqualTo(m1.getId());
     }
 
+    /**
+     * @Description [Binding] - Collection Binding, 메소드 이름으로 쿼리 생성
+     **/
     @Test
     @Transactional
-    public void findByNames(){
-        Member m1 = new Member("AAA", 10);
-        Member m2 = new Member("BBB", 20);
-        memberRepository.save(m1);
-        memberRepository.save(m2);
-
-        List<Member> names = memberRepository.findByNames(Arrays.asList("AAA", "CCC"));
-        assertThat(names.size()).isEqualTo(1);
-        assertThat(names.get(0).getUsername()).isEqualTo("AAA");
-    }
-
-    @Test
-    @Transactional
-    public void findByUsernameIn(){
+    public void bindingMethodName(){
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("BBB", 20);
         memberRepository.save(m1);
@@ -158,9 +165,29 @@ class MemberRepositoryTest {
         assertThat(names.get(0).getUsername()).isEqualTo("AAA");
     }
 
+    /**
+     * @Description [Binding] - Collection Binding, @Query 쿼리 생성
+     **/
     @Test
     @Transactional
-    public void returnType(){
+    public void bindingQueryAnnotation(){
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("BBB", 20);
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+
+        List<Member> names = memberRepository.findByNames(Arrays.asList("AAA", "CCC"));
+        assertThat(names.size()).isEqualTo(1);
+        assertThat(names.get(0).getUsername()).isEqualTo("AAA");
+    }
+
+
+    /**
+     * @Description [Response Type] - 컬렉션/단건/단건(Optional)
+     **/
+    @Test
+    @Transactional
+    public void responseType(){
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("AAA", 20);
         memberRepository.save(m1);
@@ -173,5 +200,57 @@ class MemberRepositoryTest {
         assertThat(members.size()).isEqualTo(0);
         assertThat(member).isEqualTo(null);
         assertThat(memberOptional.isPresent()).isEqualTo(false);
+    }
+
+    /**
+     * @Description [Paging]
+     **/
+    @Test
+    @Transactional
+    public void paging(){
+        Team teamA = new Team("teamA");
+        teamRepository.save(teamA);
+        Member m1 = new Member("member1", 10);
+        Member m2 = new Member("member2", 10);
+        Member m3 = new Member("member3", 10);
+        Member m4 = new Member("member4", 10);
+        Member m5 = new Member("member5", 10);
+        m1.setTeam(teamA);
+        m2.setTeam(teamA);
+        m3.setTeam(teamA);
+        m4.setTeam(teamA);
+        m5.setTeam(teamA);
+
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+        memberRepository.save(m3);
+        memberRepository.save(m4);
+        memberRepository.save(m5);
+
+        int age = 10;
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
+
+        Page<Member> page = memberRepository.findByAge(age, pageRequest);
+        Slice<Member> slice = memberRepository.findByAgeSlice(age, pageRequest);
+
+        //꿀팁!!
+//        Page<MemberDto> pageDtos = page.map(m -> new MemberDto());
+//        Slice<MemberDto> sliceDtos = slice.map(member -> new MemberDto(member.getId(), member.getUsername(), member.getTeam().getName()));
+
+        //page
+        List<Member> content = page.getContent(); //조회된 데이터
+        assertThat(content.size()).isEqualTo(3); //조회된 데이터 수
+        assertThat(page.getTotalElements()).isEqualTo(5); //전체 데이터 수
+        assertThat(page.getNumber()).isEqualTo(0); //페이지 번호
+        assertThat(page.getTotalPages()).isEqualTo(2); //전체 페이지 번호
+        assertThat(page.isFirst()).isTrue(); //첫번째 항목인가?
+        assertThat(page.hasNext()).isTrue(); //다음 페이지가 있는가?
+
+        //slice
+        List<Member> contentSlice = slice.getContent(); //조회된 데이터
+        assertThat(contentSlice.size()).isEqualTo(3); //조회된 데이터 수
+        assertThat(slice.getNumber()).isEqualTo(0); //페이지 번호
+        assertThat(slice.isFirst()).isTrue(); //첫번째 항목인가?
+        assertThat(slice.hasNext()).isTrue(); //다음 페이지가 있는가?
     }
 }

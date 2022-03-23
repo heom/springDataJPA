@@ -2,6 +2,9 @@ package me.study.datajpa.repository;
 
 import me.study.datajpa.dto.MemberDto;
 import me.study.datajpa.entity.Member;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,7 +24,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     /**
      * @Description [Query Method]
      **/
-    // 1번, 메소드 이름으로 쿼리 생성 예시
+    // 1번, 메소드 이름으로 쿼리 생성
     List<Member> findByUsernameAndAgeGreaterThan(String username, int age);
     // 2번, @NamedQuery
     //@Query(name = "Member.findByUsername") //없어도 되긴 함, 순서가 메소드명으로 NamedQuery로 먼저 찾기 때문에
@@ -54,9 +57,19 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
 
     /**
-     * @Description [반환 타입]
+     * @Description [Response Type]
      **/
     List<Member> findListByUsername(String username); // 컬렉션
     Member findMemberByUsername(String username); // 단건
     Optional<Member> findOptionalByUsername(String username); //단건 Optional
+
+
+    /**
+     * @Description [Paging]
+     **/
+    @Query(value="select m, t from Member m left join m.team t where m.age = :age"
+            ,countQuery = "select count(m.username) from Member  m where m.age = :age")
+    Page<Member> findByAge(@Param("age") int age, Pageable pageable); //Page<T>
+    @Query("select m from Member m where m.age = :age")
+    Slice<Member> findByAgeSlice(@Param("age") int age, Pageable pageable); //Slice<T>
 }

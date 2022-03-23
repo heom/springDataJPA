@@ -14,7 +14,7 @@
 - **SPRING-DATA-JPA 장점**
   - 기본 (crud)메소드 추상화함으로 중복되는 코드가 간결해짐
     - EntityManager를 활용한 클래스 개발 안함 / JpaRepository를 상속받은 인터페이스만 만들면 됨
-  - Query Method 기능이 추가되어 코드가 간결해짐
+  - Query Method 및 추가기능(Paging ...)이 있어 코드가 간결해짐
 - **Query Method 3가지(1번과 3번만 실무에 사용하면 됨)**
   - 메소드 이름으로 쿼리 생성
     - 장점 : 컴파일 시 에러 발견 가능
@@ -37,11 +37,29 @@
     - in 절
       - 메소드 이름으로 쿼리 생성 ex -> findByUsernameIn
       - @Query 쿼리 생성 ex -> m.username in :names / @Param("names") List<String> names
-- **반환 타입**
+- **Response Type**
   - [List(T), T, Optional(T), Page(T) ...] 자유로움(https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#repository-query-return-types)
     - 대신 무조건 복수건과 단건 유의(IncorrectResultSizeDataAccessException)
   - NLP CHECK
     - List(T) ex -> if(members.size() == 0) 
     - T ex -> if(member == null)
     - Optional(T) ex -> if(memberOptional.isPresent() == false)
-  - **순수 JPA 경우, NoResultException** 
+  - 순수 JPA 경우, NoResultException
+- **Paging**
+  - 페이징과 정렬 파라미터 
+    - Sort(T) - 정렬 기능
+      - org.springframework.data.domain.Sort
+    - Pageable(T) - 페이징 기능(정렬 포함) 
+      - org.springframework.data.domain.Pageable
+  - 특별한 반환 타입
+    - Page(T) - 추가 count 쿼리 결과를 포함하는 페이징
+      - org.springframework.data.domain.Page
+      - DTO 변환 : page.map(T -> new T(...)
+      - 보통 count 쿼리가 전체 조회이기 때문에 서비스 속도에 많은 영향을 끼침!!!
+        - @Query(value="목록", countQuery="갯수") 이런 형식으로 구분지어 주는게 필수!!!!
+    - Slice(T) - 추가 count 쿼리 없이 다음 페이지만 확인 가능(내부적으로 limit + 1조회)
+      - org.springframework.data.domain.Slice
+      - DTO 변환 : slice.map(T -> new T(...)
+    - List(T)
+      - 추가 count 쿼리 없이 결과만 반환
+     
