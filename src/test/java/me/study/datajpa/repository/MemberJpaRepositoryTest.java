@@ -7,7 +7,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,6 +28,9 @@ class MemberJpaRepositoryTest {
 
     @Autowired
     MemberJpaRepository memberJpaRepository;
+
+    @PersistenceContext
+    EntityManager em;
 
     /**
      * @Description [순수 JPA 경우, Spring-Data-JPA 기본 메소드 예시]
@@ -125,5 +131,24 @@ class MemberJpaRepositoryTest {
 
         int resultCount = memberJpaRepository.bulkAgePlus(20);
         assertThat(resultCount).isEqualTo(3);
+    }
+
+    /**
+     * @Description [순수 JPA 경우, Auditing]
+     **/
+    @Test
+    public void JpaEventBaseEntity() throws InterruptedException {
+        Member member = new Member("member1");
+        memberJpaRepository.save(member); // @PrePersist
+
+        Thread.sleep(100);
+        member.setUsername("member2");
+
+        em.flush(); //@PreUpdate
+        em.clear();
+
+        Optional<Member> byId = memberJpaRepository.findById(member.getId());
+        //현재는 Spring-Data-JPA로
+//        assertThat(byId.get().getCreatedDate()).isNotEqualTo(byId.get().getUpdatedDate());
     }
 }

@@ -15,12 +15,23 @@ import javax.persistence.*;
 @Getter @Setter //**왠만하면 setter 사용금지(공부니 붙임)**
 @NoArgsConstructor(access = AccessLevel.PROTECTED) //**JPA 규정상 기본생성자는 항상 PROTECTED**
 @ToString(of = {"id", "username", "age"})
+/**
+ * @Description [@NamedQuery]
+ **/
 @NamedQuery( // 2. 메소드 이름으로 JPA NamedQuery 호출
         name = "Member.findByUsername",
         query = "select m from Member m where m.username = :username"
 )
+/**
+ * @Description [@EntityGraph]
+ **/
 @NamedEntityGraph(name = "Member.all", attributeNodes = @NamedAttributeNode("team")) //@EntityGraph Entity에서
-public class Member {
+public class Member
+        /**
+         * @Description [Auditing]
+         **/
+//       extends JpaBaseEntity { // 순수 JPA
+        extends BaseEntity { // Spring-Data-JPA
 
     @Id @GeneratedValue
     @Column(name = "member_id")

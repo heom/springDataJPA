@@ -34,20 +34,27 @@
   - Parameter Binding
     - 위치 기반 
     - **[실무 사용]** 이름 기반 - 코드 가독성과 유지보수
-      - 메소드 이름으로 쿼리 생성 ex -> findByUsername
-      - @Query 쿼리 생성 ex -> m.username = :username / @Param("username") String username
+      - 메소드 이름으로 쿼리 생성 
+        - ex -> findByUsername
+      - @Query 쿼리 생성 
+        - ex -> m.username = :username / @Param("username") String username
   - Collection Binding
     - in 절
-      - 메소드 이름으로 쿼리 생성 ex -> findByUsernameIn
-      - @Query 쿼리 생성 ex -> m.username in :names / @Param("names") List<String> names
+      - 메소드 이름으로 쿼리 생성 
+        - ex -> findByUsernameIn
+      - @Query 쿼리 생성 
+        - ex -> m.username in :names / @Param("names") List<String> names
 ------------
 - **Response Type**
   - [List(T), T, Optional(T), Page(T) ...] 자유로움(https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#repository-query-return-types)
     - **[중요]** 대신 무조건 복수건과 단건 유의(IncorrectResultSizeDataAccessException)
   - **[중요]** NLP CHECK
-    - List(T) ex -> if(members.size() == 0) 
-    - T ex -> if(member == null)
-    - Optional(T) ex -> if(memberOptional.isPresent() == false)
+    - List(T) 
+      - ex -> if(members.size() == 0) 
+    - T 
+      - ex -> if(member == null)
+    - Optional(T) 
+      - ex -> if(memberOptional.isPresent() == false)
   - 순수 JPA 경우, NoResultException
 ------------
 - **Paging**
@@ -113,3 +120,20 @@
     3. JpaRepository 상속부에 interface 추가 상속
       - ex -> public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom{
 ------------
+- **Auditing**
+  - Entity 생성,변경할 때 변경한 사람과 시간 추적
+  - 설정 방법
+    - 순수 JPA
+      1. Base Entity class 생성 
+         - **[참조]** me.study.datajpa.entity.JpaBaseEntity.java 
+      2. 사용할 Entity class에서 상속
+    - Spring-Data-JPA
+      1. @EnableJpaAuditing - 스프링 부트 설정 클래스에 적용해야함
+         - **[참조]** me.study.datajpa.DataJpaApplication.class
+      2. @EntityListeners(AuditingEntityListener.class)
+         - **[참조]** me.study.datajpa.entity.BaseTimeEntity.java
+         - **[참조]** me.study.datajpa.entity.BaseEntity.java
+      3. 사용할 Entity class에서 상속
+  - 계정 정보를 넣고 싶을 경우
+    - 등록자/수정자를 처리해주는 AuditorAware 스프링 빈 등록
+      - **[참조]** me.study.datajpa.DataJpaApplication.class 

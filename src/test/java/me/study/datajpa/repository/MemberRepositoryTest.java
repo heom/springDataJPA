@@ -357,4 +357,23 @@ class MemberRepositoryTest {
 
         assertThat(memberCustom.size()).isEqualTo(2);
     }
+
+    /**
+     * @Description [Auditing]
+     **/
+    @Test
+    public void JpaEventBaseEntity() throws InterruptedException {
+        Member member = new Member("member1");
+        memberRepository.save(member); // @PrePersist
+
+        Thread.sleep(100);
+        member.setUsername("member2");
+
+        em.flush(); //@PreUpdate
+        em.clear();
+
+        Optional<Member> byId = memberRepository.findById(member.getId());
+
+        assertThat(byId.get().getCreatedDate()).isNotEqualTo(byId.get().getLastModifiedDate());
+    }
 }
