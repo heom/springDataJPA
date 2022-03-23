@@ -10,11 +10,13 @@
 
 ## 추가 정리
 - **SPRING-DATA-JPA란?**
-  - SpringDataJPA는 기존 JPA의 기능에 SpringData의 기능을 추가하여 더욱 추상화 하여 좀 더 손쉽게 쓸 수 있도록한 Framework  
+  - SpringDataJPA는 기존 JPA의 기능에 SpringData의 기능을 추가하여 더욱 추상화 하여 좀 더 손쉽게 쓸 수 있도록한 Framework
+------------
 - **SPRING-DATA-JPA 장점**
   - 기본 (crud)메소드 추상화함으로 중복되는 코드가 간결해짐
     - EntityManager를 활용한 클래스 개발 안함 / JpaRepository를 상속받은 인터페이스만 만들면 됨
   - Query Method 및 추가기능(Paging ...)이 있어 코드가 간결해짐
+------------
 - **Query Method 3가지(1번과 3번만 실무에 사용하면 됨)**
   - **[실무 사용]** 메소드 이름으로 쿼리 생성
     - 장점 : 컴파일 시 에러 발견 가능
@@ -27,6 +29,7 @@
   - **[실무 사용]** @Query
     - 장점 : 컴파일시 에러 발견 가능
     - 장점 : 2번(@NamedQuery)와 다르게 Entity에 쿼리 정의 안해도됨
+------------
 - **Binding** 
   - Parameter Binding
     - 위치 기반 
@@ -37,14 +40,16 @@
     - in 절
       - 메소드 이름으로 쿼리 생성 ex -> findByUsernameIn
       - @Query 쿼리 생성 ex -> m.username in :names / @Param("names") List<String> names
+------------
 - **Response Type**
   - [List(T), T, Optional(T), Page(T) ...] 자유로움(https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#repository-query-return-types)
-    - 대신 무조건 복수건과 단건 유의(IncorrectResultSizeDataAccessException)
-  - NLP CHECK
+    - **[중요]** 대신 무조건 복수건과 단건 유의(IncorrectResultSizeDataAccessException)
+  - **[중요]** NLP CHECK
     - List(T) ex -> if(members.size() == 0) 
     - T ex -> if(member == null)
     - Optional(T) ex -> if(memberOptional.isPresent() == false)
   - 순수 JPA 경우, NoResultException
+------------
 - **Paging**
   - 페이징과 정렬 파라미터 
     - Sort(T) - 정렬 기능
@@ -62,22 +67,49 @@
       - DTO 변환 : slice.map(T -> new T(...)
     - List(T)
       - 추가 count 쿼리 없이 결과만 반환
+------------
 - **BulkUpdate Query**
-  - returnType : int / @Modifying 필수
+  - **[중요]** returnType : int / @Modifying 필수
   - 만약 한 트랜젝션이면 영속성 유지를 위하여, 꼭 BulkUpdate 이 후
-    1. EntityManager flush()/clear()
-    2. **[실무 사용]** @Modifying(clearAutomatically = true) 
+    - EntityManager flush()/clear()
+    - **[실무 사용]** @Modifying(clearAutomatically = true)
+------------
 - **@EntityGraph**     
-  - FetchType.LAZY 경우 N+1 문제가 발생, 즉 추가 Query 발생
-    1. **[실무 사용]** @Query 사용 시 fetch 추가 
+  - **[중요]** FetchType.LAZY 경우 N+1 문제가 발생, 즉 추가 Query 발생
+    - **[실무 사용]** @Query 사용 시 fetch 추가 
        - ex -> select m from Member m left join fetch m.team
-    2. **[실무 사용]** @EntityGraph(attributePaths = {})
+    - **[실무 사용]** @EntityGraph(attributePaths = {})
        - ex -> @EntityGraph(attributePaths = {"team"})
-    3. @NamedEntityGraph Entity 추가 
+    - @NamedEntityGraph Entity 추가 
        - ex -> @NamedEntityGraph(name = "Member.all", attributeNodes = @NamedAttributeNode("team"))
+------------
 - **JPA Hint**
-  - 영속성 객체의 값을 변경하였을 경우, 저절로 Update되는 경우를 방지하기 위하여 readOnly 명시
+  - **[중요]** 영속성 객체의 값을 변경하였을 경우, 저절로 Update되는 경우를 방지하기 위하여 readOnly 명시
   - @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value="true"))
+------------
 - **JPA Lock**
   - Select For Update
   - 트래픽이 많은 서비스에서는 왠만하면 안씀, 나중에 꼭 공부해 볼 것!
+------------
+- **Custom Repository**
+  - 스프링 데이터 JPA 리포지토리는 인터페이스만 정의하고 구현체는 스프링이 자동 생성
+  - 스프링 데이터 JPA가 제공하는 인터페이스를 직접 구현하면 구현해야 하는 기능이 너무 많음
+  - 다양한 이유로 인터페이스의 메서드를 직접 구현하고 싶다면?
+    - JPA 직접 사용( EntityManager )
+    - 스프링 JDBC Template 사용
+    - MyBatis 사용
+    - 데이터베이스 커넥션 직접 사용 등등...
+    - **[실무 사용]** Querydsl 사용
+  - 설정 방법
+    1. [Custom Repository] interface 생성
+    2. [Custom Repository] class 생성 실질적 구현부 작성
+      - **[중요]** class 명명 규칙 = 기존Repository+Impl || 커스텀Interface+Impl
+        - ex -> MemberRepositoryImpl || MemberRepositoryCustomImpl
+      - Impl 말고 다른 것을 사용하고 싶을 시, 아래 추가
+        - XML 
+          - '<'repositories base-package="study.datajpa.repository" repository-impl-postfix="Impl" />
+        - JavaConfig
+          - @EnableJpaRepositories(basePackages = "study.datajpa.repository",repositoryImplementationPostfix = "Impl")
+    3. JpaRepository 상속부에 interface 추가 상속
+      - ex -> public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom{
+------------

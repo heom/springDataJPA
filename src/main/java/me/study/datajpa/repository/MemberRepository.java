@@ -20,7 +20,11 @@ import java.util.Optional;
  * @Date 2022-03-22
  * @Description Spring-Data-JPA Member Repository
  **/
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long>
+        /**
+         * @Description [Custom Repository]
+         **/
+        , MemberRepositoryCustom{ // [Custom Repository] interface 상속
 
     /**
      * @Description [Query Method]
