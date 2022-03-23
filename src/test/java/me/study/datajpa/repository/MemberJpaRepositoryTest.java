@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @Description 순수 JPA TEST
  **/
 @SpringBootTest
+@Transactional
 @Rollback(false)
 class MemberJpaRepositoryTest {
 
@@ -29,7 +30,6 @@ class MemberJpaRepositoryTest {
      * @Description [순수 JPA 경우, Spring-Data-JPA 기본 메소드 예시]
      **/
     @Test
-    @Transactional
     public void basicCRUD(){
         Member member1 = new Member("member1");
         Member member2 = new Member("member2");
@@ -63,7 +63,6 @@ class MemberJpaRepositoryTest {
      * @Description [순수 JPA 경우, Query Method] - 1번, 메소드 이름으로 쿼리 생성 예시
      **/
     @Test
-    @Transactional
     public void methodNameQuery(){
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("AAA", 20);
@@ -81,7 +80,6 @@ class MemberJpaRepositoryTest {
      * @Description [순수 JPA 경우, Query Method] - 2번, @NamedQuery
      **/
     @Test
-    @Transactional
     public void namedQueryAnnotation(){
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("AAA", 20);
@@ -96,7 +94,6 @@ class MemberJpaRepositoryTest {
      * @Description [순수 JPA 경우, Paging]
      **/
     @Test
-    @Transactional
     public void paging(){
         memberJpaRepository.save(new Member("member1", 10));
         memberJpaRepository.save(new Member("member2", 10));
@@ -119,7 +116,6 @@ class MemberJpaRepositoryTest {
      * @Description [순수 JPA 경우, Bulk-Update Query]
      **/
     @Test
-    @Transactional
     public void bulkUpdate(){
         memberJpaRepository.save(new Member("member1", 10));
         memberJpaRepository.save(new Member("member2", 19));

@@ -29,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @Description Spring Data JPA TEST
  **/
 @SpringBootTest
+@Transactional
 @Rollback(false)
 class MemberRepositoryTest {
 
@@ -45,7 +46,6 @@ class MemberRepositoryTest {
      * @Description [Spring-Data-JPA 기본 메소드]
      **/
     @Test
-    @Transactional
     public void basicCRUD(){
         Member member1 = new Member("member1");
         Member member2 = new Member("member2");
@@ -79,7 +79,6 @@ class MemberRepositoryTest {
      * @Description [Query Method] - 1번, 메소드 이름으로 쿼리 생성
      **/
     @Test
-    @Transactional
     public void methodNameQuery(){
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("AAA", 20);
@@ -98,7 +97,6 @@ class MemberRepositoryTest {
      * @Description [Query Method] - 2번, @NamedQuery
      **/
     @Test
-    @Transactional
     public void namedQueryAnnotation(){
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("BBB", 20);
@@ -113,7 +111,6 @@ class MemberRepositoryTest {
      * @Description [Query Method] -3번, @Query
      **/
     @Test
-    @Transactional
     public void queryAnnotation(){
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("AAA", 20);
@@ -128,7 +125,6 @@ class MemberRepositoryTest {
      * @Description [반환 객체가 다를 경우] - List<String> 받는 경우
      **/
     @Test
-    @Transactional
     public void resultStringList(){
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("BBB", 20);
@@ -144,7 +140,6 @@ class MemberRepositoryTest {
      * @Description [반환 객체가 다를 경우] - List<MemberDto> 받는 경우, 다만 QueryDsl 쓰면 더 쉬워지니 우선 참고할 용도로만 씀
      **/
     @Test
-    @Transactional
     public void resultAnotherDTO(){
         Team teamA = new Team("teamA");
         teamRepository.save(teamA);
@@ -160,7 +155,6 @@ class MemberRepositoryTest {
      * @Description [Binding] - Collection Binding, 메소드 이름으로 쿼리 생성
      **/
     @Test
-    @Transactional
     public void bindingMethodName(){
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("BBB", 20);
@@ -176,7 +170,6 @@ class MemberRepositoryTest {
      * @Description [Binding] - Collection Binding, @Query 쿼리 생성
      **/
     @Test
-    @Transactional
     public void bindingQueryAnnotation(){
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("BBB", 20);
@@ -193,7 +186,6 @@ class MemberRepositoryTest {
      * @Description [Response Type] - 컬렉션/단건/단건(Optional)
      **/
     @Test
-    @Transactional
     public void responseType(){
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("AAA", 20);
@@ -213,7 +205,6 @@ class MemberRepositoryTest {
      * @Description [Paging]
      **/
     @Test
-    @Transactional
     public void paging(){
         Team teamA = new Team("teamA");
         teamRepository.save(teamA);
@@ -265,7 +256,6 @@ class MemberRepositoryTest {
      * @Description [Bulk-Update Query]
      **/
     @Test
-    @Transactional
     public void bulkUpdate(){
         memberRepository.save(new Member("member1", 10));
         memberRepository.save(new Member("member2", 19));
@@ -298,7 +288,6 @@ class MemberRepositoryTest {
      * @Description [@EntityGraph]
      **/
     @Test
-    @Transactional
     public void entityGraphAnnotation(){
         Team teamA = new Team("teamA");
         Team teamB = new Team("teamB");
@@ -325,5 +314,34 @@ class MemberRepositoryTest {
             System.out.println("member => "+member);
             System.out.println("member.team.name => "+member.getTeam().getName());
         }
+    }
+
+    /**
+     * @Description [JPA Hint]
+     **/
+    @Test
+    public void queryHint(){
+        Member member = memberRepository.save(new Member("member1", 10));
+        em.flush();
+        em.clear();
+
+        // 값을 변경할 경우 강제 update query
+//        Member findMember = memberRepository.findById(member.getId()).get();
+        // readOnly 명시
+        Member findMember = memberRepository.findReadOnlyByUsername(member.getUsername());
+        findMember.setUsername("member2");
+        em.flush();
+    }
+
+    /**
+     * @Description [JPA Lock]
+     **/
+    @Test
+    public void lock(){
+        Member member = memberRepository.save(new Member("member1", 10));
+        em.flush();
+        em.clear();
+
+        List<Member> members = memberRepository.findLockByUsername("member1");
     }
 }

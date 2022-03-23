@@ -16,7 +16,7 @@
     - EntityManager를 활용한 클래스 개발 안함 / JpaRepository를 상속받은 인터페이스만 만들면 됨
   - Query Method 및 추가기능(Paging ...)이 있어 코드가 간결해짐
 - **Query Method 3가지(1번과 3번만 실무에 사용하면 됨)**
-  - **[사용]** 메소드 이름으로 쿼리 생성
+  - **[실무 사용]** 메소드 이름으로 쿼리 생성
     - 장점 : 컴파일 시 에러 발견 가능
     - 장점 : 간편함 - 메소드명 작성만으로 저절로 쿼리 생성 
     - 단점 : 조건이 길어질 수록 메소드명이 너무 난잡해짐
@@ -24,13 +24,13 @@
     - 장점 : 컴파일시 에러 발견 가능
       - 순수 JPQL 사용시 컬럼명을 잘 못써도 호출까지 에러발견을 못하지만, @NamedQuery로 작성할 경우 컴파일에서 에러 발견 가능
     - 단점 : Entity에 쿼리 작성
-  - **[사용]** @Query
+  - **[실무 사용]** @Query
     - 장점 : 컴파일시 에러 발견 가능
     - 장점 : 2번(@NamedQuery)와 다르게 Entity에 쿼리 정의 안해도됨
 - **Binding** 
   - Parameter Binding
     - 위치 기반 
-    - **[사용]** 이름 기반 - 코드 가독성과 유지보수
+    - **[실무 사용]** 이름 기반 - 코드 가독성과 유지보수
       - 메소드 이름으로 쿼리 생성 ex -> findByUsername
       - @Query 쿼리 생성 ex -> m.username = :username / @Param("username") String username
   - Collection Binding
@@ -66,12 +66,18 @@
   - returnType : int / @Modifying 필수
   - 만약 한 트랜젝션이면 영속성 유지를 위하여, 꼭 BulkUpdate 이 후
     1. EntityManager flush()/clear()
-    2. **[사용]** @Modifying(clearAutomatically = true) 
+    2. **[실무 사용]** @Modifying(clearAutomatically = true) 
 - **@EntityGraph**     
   - FetchType.LAZY 경우 N+1 문제가 발생, 즉 추가 Query 발생
-    1. **[사용]** @Query 사용 시 fetch 추가 
+    1. **[실무 사용]** @Query 사용 시 fetch 추가 
        - ex -> select m from Member m left join fetch m.team
-    2. **[사용]** @EntityGraph(attributePaths = {})
+    2. **[실무 사용]** @EntityGraph(attributePaths = {})
        - ex -> @EntityGraph(attributePaths = {"team"})
     3. @NamedEntityGraph Entity 추가 
-       - ex -> @NamedEntityGraph(name = "Member.all", attributeNodes = @NamedAttributeNode("team")) 
+       - ex -> @NamedEntityGraph(name = "Member.all", attributeNodes = @NamedAttributeNode("team"))
+- **JPA Hint**
+  - 영속성 객체의 값을 변경하였을 경우, 저절로 Update되는 경우를 방지하기 위하여 readOnly 명시
+  - @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value="true"))
+- **JPA Lock**
+  - Select For Update
+  - 트래픽이 많은 서비스에서는 왠만하면 안씀, 나중에 꼭 공부해 볼 것!
