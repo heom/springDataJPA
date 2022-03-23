@@ -19,7 +19,7 @@ import java.util.Optional;
 public class MemberJpaRepository {
 
     @PersistenceContext
-    private EntityManager em;
+    EntityManager em;
 
     /**
      * @Description [순수 JPA 경우, Spring-Data-JPA 기본 메소드 예시]
@@ -83,5 +83,14 @@ public class MemberJpaRepository {
         return em.createQuery("select count(m) from Member m where m.age = :age", Long.class)
                 .setParameter("age", age)
                 .getSingleResult();
+    }
+
+    /**
+     * @Description [순수 JPA 경우, Bulk-Update Query]
+     **/
+    public int bulkAgePlus(int age){
+        return em.createQuery("update Member m set m.age = m.age+1 where m.age >= :age")
+                .setParameter("age", age)
+                .executeUpdate();
     }
 }

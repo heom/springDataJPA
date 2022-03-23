@@ -62,4 +62,9 @@
       - DTO 변환 : slice.map(T -> new T(...)
     - List(T)
       - 추가 count 쿼리 없이 결과만 반환
+- **BulkUpdate Query**
+  - returnType : int / @Modifying 필수
+  - 만약 한 트랜젝션이면 영속성 유지를 위하여, 꼭 BulkUpdate 이 후
+    1. EntityManager flush()/clear()를 해주거나
+    2. @Modifying(clearAutomatically = true) 해야한다. 
      

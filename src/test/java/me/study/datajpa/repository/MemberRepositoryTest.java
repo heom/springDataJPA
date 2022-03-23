@@ -12,6 +12,8 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +35,9 @@ class MemberRepositoryTest {
 
     @Autowired
     TeamRepository teamRepository;
+
+    @PersistenceContext
+    EntityManager em;
 
     /**
      * @Description [Spring-Data-JPA 기본 메소드]
@@ -252,5 +257,38 @@ class MemberRepositoryTest {
         assertThat(slice.getNumber()).isEqualTo(0); //페이지 번호
         assertThat(slice.isFirst()).isTrue(); //첫번째 항목인가?
         assertThat(slice.hasNext()).isTrue(); //다음 페이지가 있는가?
+    }
+
+    /**
+     * @Description [Bulk-Update Query]
+     **/
+    @Test
+    @Transactional
+    public void bulkUpdate(){
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 19));
+        memberRepository.save(new Member("member3", 20));
+        memberRepository.save(new Member("member4", 21));
+        memberRepository.save(new Member("member5", 40));
+
+        int resultCount = memberRepository.bulkAgePlus(20);
+        //영속성 유지가 안되어, DB == 41인데 캐쉬때문에 40이 반환됨
+//        List<Member> members5 = memberRepository.findByUsername("member5");
+//        Member member5 = members5.get(0);
+//      assertThat(member5.getAge()).isEqualTo(41); //error
+
+        //위의 문제를 해결하기 위하여 EntityManager flush()/clear()를 해주거나
+//        em.flush();
+//        em.clear();
+//        List<Member> members5 = memberRepository.findByUsername("member5");
+//        Member member5 = members5.get(0);
+//        assertThat(member5.getAge()).isEqualTo(41);
+
+        //@Modifying(clearAutomatically = true)
+        List<Member> members5 = memberRepository.findByUsername("member5");
+        Member member5 = members5.get(0);
+        assertThat(member5.getAge()).isEqualTo(41);
+
+        assertThat(resultCount).isEqualTo(3);
     }
 }
