@@ -136,4 +136,11 @@
       3. 사용할 Entity class에서 상속
   - 계정 정보를 넣고 싶을 경우
     - 등록자/수정자를 처리해주는 AuditorAware 스프링 빈 등록
-      - **[참조]** me.study.datajpa.DataJpaApplication.class 
+      - **[참조]** me.study.datajpa.DataJpaApplication.class
+------------
+- **Domain Converter**
+  - 스프링 데이터 JPA가 자동으로 DB에서 매핑해줌
+  - **[참조]** me.study.datajpa.controller.MemberController.java
+  - **[중요]** 기능은 존재하지만 쓰지말자!!!
+    - 트랜젝션이 없는 상태에서 조회되므로 영속성 유지가 안된 상태
+------------
