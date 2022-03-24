@@ -159,3 +159,17 @@
   - **[중요]** Page(Entity) -> Page(DTO) 변경
     - ex -> memberRepository.findAll(pageable).map(m -> new MemberDto(m.getId(), m.getUsername(), null))
       - **[참조]** me.study.datajpa.controller.MemberController.java
+------------
+- **[기능 심화] 새로운 Entity인지 판별하는 법?**
+  - 식별자가 객체일 때 null 로 판단
+  - 식별자가 자바 기본 타입일 때 0 으로 판단
+  - **[중요]** 하지만 !!!!
+    - 문제점 
+      - 식별자가 보통 쓰는 @Id @GeneratedValue Long id이 아니고 @Id String id 일 경우(식별자를 강제로 주는 경우),  
+        pk값이 존재하기 하기 때문에 persist()가 아닌 merge()로 사용.  
+        즉, select -> insert 2번의 쿼리가 발생
+    - 해결방법
+      - Persistable 인터페이스를 구현해서 판단 로직 변경 가능
+        - 해당 Entity에 Persistable<T>를 상속받아 isNew() 메소드를 오버라이드하여 신규 Entity인지 커스텀
+        - **[실무 사용]** [Auditing]에서 추가한 생성일이 == null로 파악
+          - **[참조]** me.study.datajpa.repository.Item.java

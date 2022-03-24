@@ -63,7 +63,7 @@ public class MemberController {
                 .map(MemberDto::new); // Member 파라미터로 하는  MemberDto 생성자 생성하면 이렇게 소스를 줄일 수 있음
     }
 
-    @PostConstruct
+//    @PostConstruct //잠깐 제외
     public void init(){
         for(int i =0; i < 100; i++){
             memberRepository.save(new Member("user" + i, i));
