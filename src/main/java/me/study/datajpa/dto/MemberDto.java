@@ -2,6 +2,7 @@ package me.study.datajpa.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import me.study.datajpa.entity.Member;
 
 /**
  * @FileName MemberDto.java
@@ -22,5 +23,10 @@ public class MemberDto {
         this.id = id;
         this.username = username;
         this.teamName = teamName;
+    }
+
+    public MemberDto(Member member){
+        this.id = member.getId();
+        this.username = member.getUsername();
     }
 }

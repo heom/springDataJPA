@@ -138,9 +138,24 @@
     - 등록자/수정자를 처리해주는 AuditorAware 스프링 빈 등록
       - **[참조]** me.study.datajpa.DataJpaApplication.class
 ------------
-- **Domain Converter**
-  - 스프링 데이터 JPA가 자동으로 DB에서 매핑해줌
+- **[Web 확장] Domain Converter**
+  - 스프링 데이터 JPA가 자동으로 DB에서 매핑
   - **[참조]** me.study.datajpa.controller.MemberController.java
   - **[중요]** 기능은 존재하지만 쓰지말자!!!
     - 트랜젝션이 없는 상태에서 조회되므로 영속성 유지가 안된 상태
 ------------
+- **[Web 확장] Paging & Sort**
+  - 스프링 데이터 JPA가 자동으로 PageRequest를 생성하여 매핑
+  - 파라미터 ex -> /members?page=0&size=3&sort=id,desc&sort=username,desc
+    - page
+    - size
+    - sort
+  - Default 값 변경
+    - 글로벌일 경우, yml 변경 
+      - spring.data.web.pageable.default-page-size=20 /# 기본 페이지 사이즈/
+      - spring.data.web.pageable.max-page-size=2000 /# 최대 페이지 사이즈/
+    - 개별일 경우,  @PageableDefault 추가
+      - **[참조]** me.study.datajpa.controller.MemberController.java
+  - **[중요]** Page(Entity) -> Page(DTO) 변경
+    - ex -> memberRepository.findAll(pageable).map(m -> new MemberDto(m.getId(), m.getUsername(), null))
+      - **[참조]** me.study.datajpa.controller.MemberController.java
