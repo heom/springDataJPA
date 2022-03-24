@@ -4,7 +4,7 @@
 ## 프로젝트 개발 구성
 - Java 8
 - Spring Boot(+Gradle) 2.2.1
-- H2(Embeded)
+- H2
 - SpringDataJPA
 - JUnit5
 
@@ -173,3 +173,54 @@
         - 해당 Entity에 Persistable<T>를 상속받아 isNew() 메소드를 오버라이드하여 신규 Entity인지 커스텀
         - **[실무 사용]** [Auditing]에서 추가한 생성일이 == null로 파악
           - **[참조]** me.study.datajpa.repository.Item.java
+------------
+- **[나머지 기능] Specifications (명세)**
+  - **[중요]** 실무에서는 JPA Criteria를 거의 안쓴다! 대신에 QueryDSL을 사용하자
+  - 책 '도메인 주도 설계(Domain Driven Design)'는 SPECIFICATION(명세)라는 개념을 소개
+  - 스프링 데이터 JPA는 JPA Criteria를 활용해서 이 개념을 사용할 수 있도록 지원
+  - 코드 난잡, 유지보수 최악
+  - 술어(predicate)
+    - 참 또는 거짓으로 평가
+    - AND OR 같은 연산자로 조합해서 다양한 검색조건을 쉽게 생성(컴포지트 패턴)
+    - 예) 검색 조건 하나하나
+    - 스프링 데이터 JPA는 org.springframework.data.jpa.domain.Specification 클래스로 정의
+------------
+- **[나머지 기능] Query By Example**
+  - **[중요]** 실무에서 사용하기에는 매칭 조건이 너무 단순하고 LEFT 조인이 안됨, 실무에서는 QueryDSL을 사용하자
+  - 장점
+    - 동적 쿼리를 편리하게 처리
+    - 도메인 객체를 그대로 사용
+    - 데이터 저장소를 RDB에서 NOSQL로 변경해도 코드 변경이 없게 추상화 되어 있음
+    - 스프링 데이터 JPA JpaRepository 인터페이스에 이미 포함
+  - 단점
+    - 조인은 가능하지만 내부 조인(INNER JOIN)만 가능함 외부 조인(LEFT JOIN) 안됨
+    - 다음과 같은 중첩 제약조건 안됨
+      - ex -> firstname = ?0 or (firstname = ?1 and lastname = ?2)
+    - 매칭 조건이 매우 단순함
+      - 문자는 starts/contains/ends/regex
+      - 다른 속성은 정확한 매칭( = )만 지원
+------------
+- **[나머지 기능] Projections**
+  - **[중요]** 실무에서는 단순할 때만 사용하고, 조금만 복잡해지면 QueryDSL을 사용하자
+  - root 엔티티면 유용, root 엔티티를 넘어가면 JPQL SELECT 최적화가 안됨.
+------------
+- **[나머지 기능] Native Query**
+  - **[중요]** 가급적 네이티브 쿼리는 사용하지 않는게 좋음, 정말 어쩔 수 없을 때 사용
+  - 보통 반환데이터가 조인 되어 지저분한 데이터일 경우가 많음 
+  - 최근에 나온 궁극의 방법 -> 스프링 데이터 Projections 활용
+  - 스프링 데이터 JPA
+    - 페이징 지원
+    - 반환 타입
+      - Object[]
+      - Tuple
+      - DTO(스프링 데이터 인터페이스 Projections 지원
+    - 제약
+      - Sort 파라미터를 통한 정렬이 정상 동작하지 않을 수 있음(믿지 말고 직접 처리)
+      - JPQL처럼 애플리케이션 로딩 시점에 문법 확인 불가
+      - 동적 쿼리 불가
+    - **[중요]** 네이티브 SQL을 DTO로 조회할 때는 JdbcTemplate or myBatis 권장
+  - Projections 활용
+    - 스프링 데이터 JPA 네이티브 쿼리 + 인터페이스 기반 Projections 활용
+    - 동적 네이티브 쿼리
+      - 하이버네이트를 직접 활용
+      - 스프링 JdbcTemplate, myBatis, jooq같은 외부 라이브러리 사용
